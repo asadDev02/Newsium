@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements CategoryRVAdapter
         newsRV.setAdapter(newsRVAdapter);
         categoryRV.setAdapter(categoryRVAdapter);
         getCategories();
+        getNews("All");
+        newsRVAdapter.notifyDataSetChanged();
 
     }
 
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements CategoryRVAdapter
     }
     @Override
     public void onCategoryClick(int position) {
-
+        String category = categoryRVModalArrayList.get(position).getCategory();
+        getNews(category);
     }
 }
