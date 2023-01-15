@@ -5,9 +5,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements CategoryRVAdapter.CategoryClickInterface{
 
@@ -34,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements CategoryRVAdapter
         newsRV.setLayoutManager(new LinearLayoutManager(this));
         newsRV.setAdapter(newsRVAdapter);
         categoryRV.setAdapter(categoryRVAdapter);
+        getCategories();
 
     }
 
@@ -46,10 +55,48 @@ public class MainActivity extends AppCompatActivity implements CategoryRVAdapter
         categoryRVModalArrayList.add(new CategoryRVModal("Business", "https://images.unsplash.com/photo-1665686306574-1ace09918530?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fGJ1c2luZXNzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60"));
         categoryRVModalArrayList.add(new CategoryRVModal("Entertainment", "https://images.unsplash.com/photo-1603739903239-8b6e64c3b185?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=871&q=80"));
         categoryRVModalArrayList.add(new CategoryRVModal("Health", "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1032&q=80"));
-
+        categoryRVAdapter.notifyDataSetChanged();
 
     }
 
+    private void getNews(String category){
+        loadingPB.setVisibility(View.VISIBLE);
+        articlesArrayList.clear();
+        String categoryURL = "https://newsapi.org/v2/top-headlines?country=in&category="+category+"&apikey=d1e9971cd2e14928be70b01021755719";
+        String url = "https://newsapi.org/v2/top-headlines?country=in&exculdeDomains=stackoverflow.com&sortBy=publishedAt&language=en&apikey=d1e9971cd2e14928be70b01021755719";
+        String BASE_URL = "https://newsapi.org/";
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RetrofitAPI retrofitAPI = retrofit.create(RetrofitAPI.class);
+        Call<NewsModal> call;
+        if(category.equals("All")){
+            call = retrofitAPI.getAllNews(url);
+        }
+        else{
+            call = retrofitAPI.getNewsByCategory(categoryURL);
+        }
+        call.enqueue(new Callback<NewsModal>() {
+            @Override
+            public void onResponse(Call<NewsModal> call, Response<NewsModal> response) {
+                NewsModal newsModal = response.body();
+                loadingPB.setVisibility(View.GONE);
+                ArrayList<Articles> articles = newsModal.getArticles();
+                for (int i =0; i<articles.size();i++){
+                    articlesArrayList.add(new Articles(articles.get(i).getTitle(), articles.get(i).getDescription(), articles.get(i).getUrlToImage(),
+                            articles.get(i).getUrl(), articles.get(i).getContent()));
+
+                }
+                newsRVAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<NewsModal> call, Throwable throwable) {
+                Toast.makeText(MainActivity.this, "Failed to get news",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     @Override
     public void onCategoryClick(int position) {
 
