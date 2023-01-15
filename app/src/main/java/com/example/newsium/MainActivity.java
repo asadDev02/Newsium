@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity implements CategoryRVAdapter
                 loadingPB.setVisibility(View.GONE);
                 ArrayList<Articles> articles = newsModal.getArticles();
                 for (int i =0; i<articles.size();i++){
-                    articlesArrayList.add(new Articles(articles.get(i).getTitle(), articles.get(i).getDescription(), articles.get(i).getUrlToImage(),
-                            articles.get(i).getUrl(), articles.get(i).getContent()));
+                    articlesArrayList.add(new Articles(articles.get(i).getTitle(), articles.get(i).getDescription(), articles.get(i).getUrl(),
+                            articles.get(i).getUrlToImage(), articles.get(i).getContent()));
 
                 }
                 newsRVAdapter.notifyDataSetChanged();
